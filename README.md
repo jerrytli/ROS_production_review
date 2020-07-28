@@ -1,6 +1,6 @@
 # Recent advancements in ROS production, regulation, and signaling in plants
 
-Bardo Castro<sup>1</sup>, Matteo Citterico<sup>2</sup>, Sachie Kimura<sup>3</sup>, Danielle M. Stevens<sup>1</sup>, Michael Wraczek<sup>2</sup>, Gitta Coaker<sup>1</sup>.
+Bardo Castro<sup>1</sup>, Matteo Citterico<sup>2</sup>, Sachie Kimura<sup>3</sup>, Michael Wraczek<sup>2</sup>, Gitta Coaker<sup>1</sup>.
 
 
 <sup>1</sup>Department of Plant Pathology, University of California, Davis, USA <br />
