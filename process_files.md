@@ -70,7 +70,7 @@
       for now, I added a progress bar for easier progress monitoring.
       ```
    
-## Part 2: Part 2: Calculate similarity across residues of C-terminus AtRBOHD
+## Part 2: Calculate similarity across residues of C-terminus AtRBOHD
    
    5. Process the fasta file blast hits to determine similarity values. 
    
