@@ -1,0 +1,4 @@
+#mannually removed these three proteins from fasta due to large INDELS
+respiratory_burst_oxidase_protein_partial_Lilium_regale_ASV46345
+Carubv10008247m_g_CrRBOHE_like
+NOX2_HUMAN_cytochrome_b245_heavy_chain

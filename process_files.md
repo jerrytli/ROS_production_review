@@ -47,7 +47,7 @@
     ```
   3. Pull out the c-terminus domain of NADPH oxidase homologs using the C-terminus AtRBOHD as a query.
         ```bash
-        blastp -query NADPH-oxidase-cTerm-reference.fasta -db ./BLAST_database/NADPH-oxidase-homologs-db -evalue 1e-8 -outfmt "6 qseqid sseqid pident evalue len qstart qend sseq" -out blast-hits-c-terminus.txt
+        blastp -query NADPH-oxidase-cTerm-reference.fasta -db ./BLAST_database/NADPH-oxidase-homologs-db -evalue 1e-10 -outfmt "6 qseqid sseqid pident evalue len qstart qend sseq" -out blast-hits-c-terminus.txt
         ```
         
        I increased the E-value cutoff to limit the number of incomplete or low quality hits as these could unnesecarily skew the sliding window values.

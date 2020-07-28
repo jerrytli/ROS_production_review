@@ -159,9 +159,9 @@ for (i in 2:nrow(holdBlast_hits)){
 hold_data_melt2 <- melt(hold_data_v2, id = c("Position"))
 
 ggplot(hold_data_melt2, aes(x = Position, y = value)) +
-  geom_rect(aes(xmin = 21, xmax = 27, ymin = -Inf, ymax = Inf), fill = "light grey", alpha = 0.01) +
-  geom_rect(aes(xmin = 180, xmax = 186, ymin = -Inf, ymax = Inf), fill = "light grey", alpha = 0.01) +
-  geom_rect(aes(xmin = 230, xmax = 236, ymin = -Inf, ymax = Inf), fill = "light grey", alpha = 0.01) +
+  geom_rect(aes(xmin = 20, xmax = 28, ymin = -Inf, ymax = Inf), fill = "light grey", alpha = 0.01) +
+  geom_rect(aes(xmin = 179, xmax = 187, ymin = -Inf, ymax = Inf), fill = "light grey", alpha = 0.01) +
+  geom_rect(aes(xmin = 229, xmax = 237, ymin = -Inf, ymax = Inf), fill = "light grey", alpha = 0.01) +
   my_ggplot_theme +
   ylim(0,100) +
   ylab("Percent Similarity\n") +
@@ -180,11 +180,16 @@ ggplot(hold_data_melt2, aes(x = Position, y = value)) +
 system("mafft --thread 12 --maxiterate 1000 --localpair C-term-hits-fixed.fasta > 'C-term-hits_alignment'")
 
 
+gmsa(Cm_ncppb382_MSA_cps22, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", posHighligthed = c(2,10,18,19,21,22)) + 
+  my_ggplot_theme + 
+  theme(panel.border = element_rect(color = "black", size = 0.2),
+        legend.position = "none") +
+  scale_y_discrete(limits = rev(rownames(Cm_ncppb382_MSA_cps22)))
 
 
 ############################################################################################################
 
-gmsa(Cm_ncppb382_MSA_cps22, seq_name = TRUE, char_width = 0.6, color = "Chemistry_AA", posHighligthed = c(2,10,18,19,21,22)) + 
+gmsa(substr(), seq_name = TRUE, char_width = 0.6, color = "Chemistry_AA", posHighligthed = c(2,10,18,19,21,22)) + 
   my_ggplot_theme + 
   theme(panel.border = element_rect(color = "black", size = 0.2),
         legend.position = "none") +

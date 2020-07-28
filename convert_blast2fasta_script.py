@@ -103,7 +103,7 @@ for each_gene in gene_list:
   each_gene_df['Query_Hit'] = ('>' + each_gene_df['Query_Hit'])
   each_gene_df['Sequence'] = (each_gene_df['Sequence'].map(lambda x: x.replace('-','')))
   each_gene_array = each_gene_df.to_numpy(copy=True)
-  numpy.savetxt("C-term-hits-fixed.fasta", each_gene_array, delimiter = "\n", newline = "\n", fmt = '%s')
+  numpy.savetxt("C-term-hits.fasta", each_gene_array, delimiter = "\n", newline = "\n", fmt = '%s')
 
 
 # for debugging
