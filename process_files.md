@@ -53,7 +53,26 @@
        I increased the E-value cutoff to limit the number of incomplete or low quality hits as these could unnesecarily skew the sliding window values.
 
    4. Processes blast outputs into fasta files for alignment: </br>
-   </br>
-       I always manually assess the blast results and see if they are reasonable (if not, rerun and alter options as necessary and pertinent). To processes these hits, the .txt file will be converted to a fasta file. Open the convert_blast2fasta_script.py python script to processes the text files into fasta files. Currently this script is not command line friendly and has to run line-by-line. However, it is stable in rstudio/rserver.
+   
+       ```
+       I always manually assess the blast results and see if they are reasonable (if not, rerun and alter options as 
+       necessary and pertinent). To processes these hits, the .txt file will be converted to a fasta file. Open the 
+       convert_blast2fasta_script.py python script to processes the text files into fasta files. Currently this script 
+       is not command line friendly and has to run line-by-line. However, it is stable in rstudio/rserver.
+       ```
     
-   5. Process the asfat file blast hits to determine similarity values.
+   5. Process the fasta file blast hits to determine similarity values.
+    
+      ```
+      I courrently working on editing the code so everything will run on R consel but for now, just open the script 
+      and run line-by-line. It should be noted that collecting simiarity values in a scanning-window appraoch takes 
+      a while to run (1-2 hours). I am working on reshashing the logic so it runs more efficently in the future, but 
+      for now, I added a progress bar for easier progress monitoring.
+      ```
+   
+## Part 2: Part 2: Calculate similarity across residues of C-terminus AtRBOHD
+   
+   5. Process the fasta file blast hits to determine similarity values. 
+   
+     (Same script as in #5 from Part 1).
+
