@@ -20,9 +20,10 @@ library(extrafont)
 ######################################################################
 
 my_ggplot_theme <- theme_bw() +
-  theme(axis.title.x = element_text(size = 12, color = "black", family = "Arial"),
-        axis.title.y = element_text(size = 12, color = "black", family = "Arial"),
-        axis.text.x = element_text(size = 11,  color = "black", family = "Arial"),
-        axis.text.y = element_text(size = 11, color = "black", family = "Arial"),
+  theme(text=element_text(size = 16,family="Helvetica"),
+          axis.title.x = element_text(size = 14, color = "black", family = "Helvetica"),
+          axis.title.y = element_text(size = 14, color = "black", family = "Helvetica"),
+        axis.text.x = element_text(size = 12,  color = "black", family = "Helvetica"),
+        axis.text.y = element_text(size = 14, color = "black", family = "Helvetica"),
         panel.grid = element_blank(), 
         panel.border = element_rect(color = "black", size = 0.8))

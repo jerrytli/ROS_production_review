@@ -1,4 +1,9 @@
+#proteins which didn't make the cutoff standards during balst search
+CrRBOH_Chlamydomonas_reinhardtii
+DcRBOHB_like_isoform_X3_Daucus_carota_subsp__Sativus_XP_017234513_1
+
 #mannually removed these three proteins from fasta due to large INDELS
 respiratory_burst_oxidase_protein_partial_Lilium_regale_ASV46345
 Carubv10008247m_g_CrRBOHE_like
 NOX2_HUMAN_cytochrome_b245_heavy_chain
+CsRBOHB_like_Chlorella_sorokiniana
