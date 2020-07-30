@@ -72,7 +72,7 @@
    
 ## Part 2: Calculate similarity across residues of C-terminus AtRBOHD
    
-   5. Process the fasta file blast hits to determine similarity values. 
+   1. Process the fasta file blast hits to determine similarity values. 
    
      (Same script as in #5 from Part 1).
 

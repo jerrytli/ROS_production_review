@@ -21,8 +21,7 @@ library(ggmsa)
 library(reshape2)
 library(cowplot)
 library(ggpubr)
-library(ggstatsplot)
-library(postscriptFonts)
+#library(postscriptFonts)
 library(ggseqlogo)
 library(extrafont)
 loadfonts(device = "pdf", quiet = FALSE)
@@ -50,10 +49,10 @@ dss2df <- function(dss){
 }
 
 
-#########################################################
+######################################################################
 # funciton - calculatee similarity scores of full length 
 # compared to similarity score of highlighted region
-#########################################################
+######################################################################
 
 
 calculate_sim_score <- function(full_sequence_in, blast_hit_in){
@@ -67,21 +66,27 @@ calculate_sim_score <- function(full_sequence_in, blast_hit_in){
 
 
 ######################################################################
-#losd file
+#load fasta and hits files file
 ######################################################################
 
 ## alternate method
-hold_file <- Biostrings::readAAStringSet(filepath = file.choose(), format = "fasta") #NADPH_oxidase_homologs.fasta
+hold_file <- Biostrings::readAAStringSet(filepath = "./NADPH_oxidase_homologs.fasta", format = "fasta") #NADPH_oxidase_homologs.fasta
 holdSeq2 <- dss2df(hold_file)
 reference_AtRBOHD <- holdSeq2[grepl("AtRBOHD",holdSeq2$names),3]
 AtRBODH_Cterm_highlight_region <- substr(reference_AtRBOHD,680,1000)
 
 
-holdBlast_hits <- Biostrings::readAAStringSet(filepath = file.choose(), format = 'fasta') #c-term-hits.fasta
+holdBlast_hits <- Biostrings::readAAStringSet(filepath = "./C-term-hits.fasta", format = 'fasta') #C-term-hits.fasta
 holdBlast_hits <- dss2df(holdBlast_hits)
 rownames(holdBlast_hits) <- NULL
 
-###### need to FIX BUG!!!!! - fixed :)
+
+
+######################################################################
+# Loop through all proteins and C-terminal qurty hits to calculate 
+# similarity score in relationship to its equivalent reference
+######################################################################
+
 
 hold_local_global_Scores <- data.frame("Full Length" = as.numeric(), "C-terminus" = as.numeric())
 for (i in 1:nrow(holdSeq2)){
@@ -101,6 +106,10 @@ for (i in 1:nrow(holdSeq2)){
 }
 
 
+######################################################################
+# melt data for plotting global comparison to each other
+######################################################################
+
 # alter data to plot
 colnames(hold_local_global_Scores) <- c("Full Length","C-terminus")
 melt_hold_local_global_Scores <- melt(hold_local_global_Scores)
@@ -112,6 +121,7 @@ ggplot(melt_hold_local_global_Scores, aes(x = variable, y = value)) +
   geom_jitter(fill = "black", alpha = 0.4, width = 0.2) +
   my_ggplot_theme +
   ylab("Percent AA Similarity") +
+  # I used 99 instead of 100 to remove the one score that comparing the reference to itself
   ylim(0,99) +
   xlab("")
 
@@ -146,9 +156,9 @@ calculate_sim_scan_score <- function(sequence_in, window_size){
 hold_data_v2 <- data.frame("Position" = seq(1:300))
 pb = txtProgressBar(min = 0, max = nrow(holdBlast_hits), initial = 0, style = 3) 
 for (i in 2:nrow(holdBlast_hits)){
-  save <- data.frame(c(calculate_sim_scan_score_v2(holdBlast_hits[i,3],20), 
+  save <- data.frame(c(calculate_sim_scan_score(holdBlast_hits[i,3],7), 
                        c(rep(NA, 
-                             (nrow(hold_data_v2)-length(calculate_sim_scan_score_v2(holdBlast_hits[i,3],20)))))))
+                             (nrow(hold_data_v2)-length(calculate_sim_scan_score(holdBlast_hits[i,3],7)))))))
   colnames(save) <- holdBlast_hits[i,2]
   hold_data_v2 <- cbind(hold_data_v2, save)
   setTxtProgressBar(pb, i)
@@ -157,14 +167,14 @@ for (i in 2:nrow(holdBlast_hits)){
 
 
 ######################################################################
-# Run through all protein hits
+# Akter data and plot scanning window analysis
 ######################################################################
 
 
 hold_data_melt2 <- melt(hold_data_v2, id = c("Position"))
 
-cutoff <- data.frame( x = c(-Inf, Inf), y = 59, cutoff = factor(59) )
-cutoff2 <- data.frame( x = c(-Inf, Inf), y = 52, cutoff2 = factor(52) )
+cutoff <- data.frame( x = c(-Inf, Inf), y = 59, cutoff = factor(52))
+#cutoff2 <- data.frame( x = c(-Inf, Inf), y = 52, cutoff2 = factor(52) )
 ggplot(hold_data_melt2, aes(x = Position, y = value)) +
   annotate(geom = "rect", xmin = 20, xmax = 28, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.7) +
   annotate(geom = "rect", xmin = 179, xmax = 187, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.7) +
@@ -179,7 +189,8 @@ ggplot(hold_data_melt2, aes(x = Position, y = value)) +
                      limits = c(0,242), expand = c(0,0)) +
   theme(plot.margin=unit(c(1,1,1,1),"cm"),
         axis.title.x = element_text(vjust = -1),
-        axis.text.x = element_text(vjust = -0.2))
+        axis.text.x = element_text(vjust = -0.2)) 
+#  geom_line(aes( x, y, linetype = cutoff ), cutoff)
 
 
 ######################################################################
