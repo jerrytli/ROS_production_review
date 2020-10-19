@@ -45,8 +45,11 @@
     # to make blast db
     makeblastdb -in NADPH_oxidase_homologs.fasta -parse_seqids -dbtype 'prot' -out NADPH-oxidase-homologs-db
     ```
-  3. Pull out the c-terminus domain of NADPH oxidase homologs using the C-terminus AtRBOHD as a query.
+  3. Pull out the c-terminus and n-terminus domain of NADPH oxidase homologs using the N-terminus and C-terminus AtRBOHD as a query.
         ```bash
+        # N-terminus hits
+        blastp -query NADPH-oxidase-hTerm-reference.fasta -db ./BLAST_database/NADPH-oxidase-homologs-db -evalue 1e-10 -outfmt "6 qseqid sseqid pident evalue len qstart qend sseq" -out blast-hits-h-terminus.txt
+        # C-terminus hits
         blastp -query NADPH-oxidase-cTerm-reference.fasta -db ./BLAST_database/NADPH-oxidase-homologs-db -evalue 1e-10 -outfmt "6 qseqid sseqid pident evalue len qstart qend sseq" -out blast-hits-c-terminus.txt
         ```
         

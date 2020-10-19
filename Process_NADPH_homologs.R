@@ -15,6 +15,7 @@
 # make sure to set path to the same place where the figure 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+#BiocManager::install('Biostrings')
 library(Biostrings)
 library(seqinr)
 library(ggmsa)
@@ -55,10 +56,41 @@ dss2df <- function(dss){
 ######################################################################
 
 
-calculate_sim_score <- function(full_sequence_in, blast_hit_in){
-  seq_global <- Biostrings::pairwiseAlignment(reference_AtRBOHD, full_sequence_in, type = 'global', substitutionMatrix = "BLOSUM62")
-  seq_local <- Biostrings::pairwiseAlignment(AtRBODH_Cterm_highlight_region, blast_hit_in, type = 'global', substitutionMatrix = "BLOSUM62")
-  my_list <- data.frame("Full Length RBOHD" = pid(seq_global, "PID1"), "RBOHD C-terminus" = pid(seq_local, "PID1"))
+calculate_sim_score <- function(full_sequence_in, blast_N_hit_in, blast_C_hit_in){
+  number_of_hits <- sum(1, nrow(blast_N_hit_in), nrow(blast_C_hit_in))
+  if(number_of_hits == 1){
+    seq_global <- Biostrings::pairwiseAlignment(reference_AtRBOHD, full_sequence_in, type = 'global', substitutionMatrix = "BLOSUM62")
+    seq_global <- Biostrings::pid(seq_global, "PID1")
+    seq_local_N_term <- NA
+    seq_local_C_term <- NA
+  }
+  if(number_of_hits == 2){
+    seq_global <- Biostrings::pairwiseAlignment(reference_AtRBOHD, full_sequence_in, type = 'global', substitutionMatrix = "BLOSUM62")
+    seq_global <- Biostrings::pid(seq_global, "PID1")
+    if(nrow(blast_N_hit_in) == 1 && nrow(blast_C_hit_in) == 0){
+      seq_local_N_term <- Biostrings::pairwiseAlignment(AtRBODH_Nterm_highlight_region, blast_N_hit_in$seq, type = 'global', substitutionMatrix = "BLOSUM62")
+      seq_local_N_term <- Biostrings::pid(seq_local_N_term, "PID1")
+      seq_local_C_term <- NA
+    }
+    if(nrow(blast_N_hit_in) == 0 && nrow(blast_C_hit_in) == 1){
+      seq_local_N_term <- NA
+      seq_local_C_term <- Biostrings::pairwiseAlignment(AtRBODH_Cterm_highlight_region, blast_C_hit_in$seq, type = 'global', substitutionMatrix = "BLOSUM62")
+      seq_local_C_term <- Biostrings::pid(seq_local_C_term, "PID1")
+    }
+  }
+  if(number_of_hits > 2){
+    seq_global <- Biostrings::pairwiseAlignment(reference_AtRBOHD, full_sequence_in, type = 'global', substitutionMatrix = "BLOSUM62")
+    seq_local_N_term <- Biostrings::pairwiseAlignment(AtRBODH_Nterm_highlight_region, blast_N_hit_in$seq, type = 'global', substitutionMatrix = "BLOSUM62")
+    seq_local_C_term <- Biostrings::pairwiseAlignment(AtRBODH_Cterm_highlight_region, blast_C_hit_in$seq, type = 'global', substitutionMatrix = "BLOSUM62")
+    
+    seq_global <- Biostrings::pid(seq_global, "PID1")
+    seq_local_N_term <- Biostrings::pid(seq_local_N_term, "PID1")
+    seq_local_C_term <- Biostrings::pid(seq_local_C_term, "PID1")
+  }
+  
+
+  my_list <- data.frame("Full Length RBOHD" = seq_global, "N-terminus" = seq_local_N_term, "C-terminus" = seq_local_C_term)
+  
   return(my_list)
 }
 
@@ -70,16 +102,22 @@ calculate_sim_score <- function(full_sequence_in, blast_hit_in){
 ######################################################################
 
 ## alternate method
-hold_file <- Biostrings::readAAStringSet(filepath = "./NADPH_oxidase_homologs.fasta", format = "fasta") #NADPH_oxidase_homologs.fasta
+hold_file <- Biostrings::readAAStringSet(filepath = "./Data_files/NADPH_oxidase_homologs.fasta", format = "fasta") #NADPH_oxidase_homologs.fasta
 holdSeq2 <- dss2df(hold_file)
 reference_AtRBOHD <- holdSeq2[grepl("AtRBOHD",holdSeq2$names),3]
-AtRBODH_Cterm_highlight_region <- substr(reference_AtRBOHD,680,1000)
+AtRBODH_Cterm_highlight_region <- substr(reference_AtRBOHD,680,nchar(reference_AtRBOHD))
+AtRBODH_Nterm_highlight_region <- substr(reference_AtRBOHD,1,376)
 
 
-holdBlast_hits <- Biostrings::readAAStringSet(filepath = "./C-term-hits.fasta", format = 'fasta') #C-term-hits.fasta
-holdBlast_hits <- dss2df(holdBlast_hits)
-rownames(holdBlast_hits) <- NULL
+holdBlast_N_hits <- Biostrings::readAAStringSet(filepath = "./Data_files/N-term-hits.fasta", format = 'fasta') #N-term-hits.fasta
+holdBlast_N_hits <- dss2df(holdBlast_N_hits)
+rownames(holdBlast_N_hits) <- NULL
 
+
+
+holdBlast_C_hits <- Biostrings::readAAStringSet(filepath = "./Data_files/C-term-hits.fasta", format = 'fasta') #C-term-hits.fasta
+holdBlast_C_hits <- dss2df(holdBlast_C_hits)
+rownames(holdBlast_C_hits) <- NULL
 
 
 ######################################################################
@@ -88,21 +126,40 @@ rownames(holdBlast_hits) <- NULL
 ######################################################################
 
 
-hold_local_global_Scores <- data.frame("Full Length" = as.numeric(), "C-terminus" = as.numeric())
+hold_local_global_Scores <- data.frame("Full Length" = as.numeric(), "N-terminus" = as.numeric(), "C-terminus" = as.numeric())
+
 for (i in 1:nrow(holdSeq2)){
-  find_blast_hit_seq <- holdBlast_hits[grepl(holdSeq2[i,2], holdBlast_hits$names, fixed = TRUE),]
-  if (nrow(find_blast_hit_seq) == 0){
+  #find hits from c-termi
+  find_blast_N_hit_seq <- holdBlast_N_hits[grepl(holdSeq2[i,2], holdBlast_N_hits$names, fixed = TRUE),]
+  find_blast_C_hit_seq <- holdBlast_C_hits[grepl(holdSeq2[i,2], holdBlast_C_hits$names, fixed = TRUE),]
+  
+  print(paste(i,nrow(find_blast_N_hit_seq), nrow(find_blast_C_hit_seq)))
+  if (nrow(find_blast_N_hit_seq) == 0 && nrow(find_blast_C_hit_seq) == 0){
     #two in original list didn't meet high enough standards after blast search, so we skip their name
-    next    
+   # next    
+    print("TRUE")
   }
-  if (nrow(find_blast_hit_seq) == 1){
-    hold_local_global_Scores <- rbind(hold_local_global_Scores, calculate_sim_score(holdSeq2[i,3], find_blast_hit_seq[,3]))
+  
+  if (nrow(find_blast_N_hit_seq) == 0 && nrow(find_blast_C_hit_seq) == 1){
+    hold_local_global_Scores <- rbind(hold_local_global_Scores, calculate_sim_score(holdSeq2[i,3], find_blast_N_hit_seq, find_blast_C_hit_seq))
   }
-  if (nrow(find_blast_hit_seq) > 1){
-    for (j in 1:nrow(find_blast_hit_seq)){
-      hold_local_global_Scores <- rbind(hold_local_global_Scores, calculate_sim_score(holdSeq2[i,3], find_blast_hit_seq[j,3]))
-    }
+  
+  if (nrow(find_blast_N_hit_seq) == 1 && nrow(find_blast_C_hit_seq) == 0){
+    hold_local_global_Scores <- rbind(hold_local_global_Scores, calculate_sim_score(holdSeq2[i,3], find_blast_N_hit_seq, find_blast_C_hit_seq))
   }
+  
+  if (nrow(find_blast_N_hit_seq) == 1 && nrow(find_blast_C_hit_seq) == 1 ){
+    hold_local_global_Scores <- rbind(hold_local_global_Scores, calculate_sim_score(holdSeq2[i,3], find_blast_N_hit_seq, find_blast_C_hit_seq))
+  }  
+
+  
+  #if (nrow(find_blast_C_hit_seq) > 1 || nrow(find_blast_N_hit_seq) > 1){
+  #  for (j in 1:nrow(find_blast_hit_seq)){
+  #    print(paste(hold_local_global_Scores, calculate_sim_score(holdSeq2[i,3], find_blast_N_hit_seq[j,3]),
+  #                                          calculate_sim_score(holdSeq2[i,3], find_blast_C_hit_seq[j,3])))
+      #hold_local_global_Scores <- rbind(hold_local_global_Scores, calculate_sim_score(holdSeq2[i,3], find_blast_hit_seq[j,3]))
+   # }
+  #}
 }
 
 
@@ -111,8 +168,8 @@ for (i in 1:nrow(holdSeq2)){
 ######################################################################
 
 # alter data to plot
-colnames(hold_local_global_Scores) <- c("Full Length","C-terminus")
-melt_hold_local_global_Scores <- melt(hold_local_global_Scores)
+colnames(hold_local_global_Scores) <- c("Full Length","N-terminus","C-terminus")
+melt_hold_local_global_Scores <- reshape2::melt(hold_local_global_Scores)
 
 
 # plot data
@@ -193,9 +250,16 @@ ggplot(hold_data_melt2, aes(x = Position, y = value)) +
 #  geom_line(aes( x, y, linetype = cutoff ), cutoff)
 
 
+
+
+
+
 ######################################################################
 # align hits of RBOHD C-term region - for creation of weblogos
 ######################################################################
+
+
+system("mafft --thread 12 --maxiterate 1000 --localpair N-term-hits.fasta > 'N-term-hits_alignment'")
 
   
 system("mafft --thread 12 --maxiterate 1000 --localpair C-term-hits.fasta > 'C-term-hits_alignment'")

@@ -62,8 +62,10 @@ os.chdir()
 # Step 1: Import files to parse - may need to edit path
 ##############################################
 
+# run one file at a time (sadly). therefore, swap *.txt for either blast-hits-c-terminus.txt or blast-hits-h-terminus.txt
+
 files_to_import = []
-files_to_import = glob.glob("/home/danimstevens/Desktop/ROS_production_review/*.txt")
+files_to_import = glob.glob("/home/danimstevens/ROS_production_review/*.txt")
 
 ##############################################
 # Step 2: Build up DataFrame:
@@ -92,7 +94,7 @@ gene_list = df.Query_Hit
 
 
 ##############################################
-# Run this version if you want only top hit for each gene - Use this version for protease Blast results!!
+# Run this version if you want only top hit for each gene 
 ############################################## 
 
 #loop through each gene and seperate into dataframes
@@ -103,7 +105,7 @@ for each_gene in gene_list:
   each_gene_df['Query_Hit'] = ('>' + each_gene_df['Query_Hit'])
   each_gene_df['Sequence'] = (each_gene_df['Sequence'].map(lambda x: x.replace('-','')))
   each_gene_array = each_gene_df.to_numpy(copy=True)
-  numpy.savetxt("C-term-hits.fasta", each_gene_array, delimiter = "\n", newline = "\n", fmt = '%s')
+  numpy.savetxt("H-term-hits.fasta", each_gene_array, delimiter = "\n", newline = "\n", fmt = '%s') #make sure to edit name based on blast file imported
 
 
 # for debugging
