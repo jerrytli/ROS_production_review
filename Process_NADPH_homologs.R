@@ -4,7 +4,7 @@
 # Last Updated: 7/27/2020
 # Script Purpose: Processing and Plotting similarity scores for NADPH oxidase homologs
 # Inputs Necessary: Theme_ggplot.R, NADPH_oxidase_homologs.fasta, C-term-hits.fasta
-# Outputs: 
+# Outputs: plots of conservation of NADPH oxiadases and their associated domains
 #-----------------------------------------------------------------------------------------------
 
 
