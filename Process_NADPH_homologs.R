@@ -343,8 +343,9 @@ system("mafft --thread 12 --maxiterate 1000 --localpair C-term-hits.fasta > 'C-t
 
 N_term_Cysteines <- list()
 for (i in 1:nrow(holdBlast_N_hits)){
-  N_term_Cysteines[[i]] <- stringr::str_count(holdBlast_N_hits$seq[i], "C")
+  N_term_Cysteines[[i]] <- stringr::str_count(holdBlast_N_hits$seq[i], "C")/1
 }
+
 N_term_Cysteines <- cbind(as.data.frame(holdBlast_N_hits$names), as.data.frame(unlist(N_term_Cysteines)))
 colnames(N_term_Cysteines) <- c("Homolog Name", "N-terminus")
 N_term_Cysteines <- melt(N_term_Cysteines)
@@ -354,8 +355,9 @@ N_term_Cysteines <- melt(N_term_Cysteines)
 
 C_term_Cysteines <- list()
 for (i in 1:nrow(holdBlast_C_hits)){
-  C_term_Cysteines[[i]] <- stringr::str_count(holdBlast_C_hits$seq[i], "C")
+  C_term_Cysteines[[i]] <- stringr::str_count(holdBlast_C_hits$seq[i], "C")/4
 }
+
 C_term_Cysteines <- cbind(as.data.frame(holdBlast_C_hits$names), as.data.frame(unlist(C_term_Cysteines)))
 colnames(C_term_Cysteines) <- c("Homolog Name", " C-terminus")
 C_term_Cysteines <- melt(C_term_Cysteines)
@@ -371,5 +373,84 @@ ggplot(test, aes(x = variable, y = value)) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_text(angle = 90))
 
+
+
+
+######################################################################
+# weblogos
+######################################################################  
+
+# after much discussion, we decided to use bardo's weblogos instead. however, I'm choosing
+# to leave this code base here for my own refernce
+
+x <- readAAStringSet(filepath = "./NADPH-oxidase-cTerm-reference.fasta", format = "fasta")
+
+
+S703_file <- readLines(file.choose())
+S862_file <- readLines(file.choose())
+T912_file <- readLines(file.choose())
+
+
+# S862 
+S703_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 20, 28, posHighligthed = c(24)) + 
+  my_ggplot_theme + 
+  theme(panel.border = element_rect(color = "black", size = 0),
+        legend.position = "none", axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(),
+        plot.margin=unit(c(-1,1,1,1), "cm")) + 
+  scale_x_continuous(breaks = c(20,21,22,23,24,25,26,27,28),
+                     labels = c(699,700,701,702,703,704,705,706,708))
+
+
+S703_logo <- ggseqlogo(S703_file,  seq_type='aa', method = 'prob') + 
+  my_ggplot_theme +
+  theme(panel.border = element_rect(color = "black", size = 0.5),
+        legend.position = "none", axis.text.x = element_blank(),
+        plot.margin=unit(c(1,1,-1,1), "cm"))
+
+plot_grid(S703_logo, S703_string,  ncol = 1, align = 'v')
+
+
+# S862
+S862_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 179, 187, posHighligthed = c(183)) + 
+  my_ggplot_theme + 
+  theme(panel.border = element_rect(color = "black", size = 0),
+        legend.position = "none", axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(),
+        plot.margin=unit(c(-1,1,1,1), "cm")) + 
+  scale_x_continuous(breaks = c(179,180,181,182,183,184,185,186,187),
+                     labels = c(858,859,860,861,862,863,864,865,866))
+
+
+
+S862_logo <- ggseqlogo(S862_file,  seq_type='aa',method = 'prob') + 
+  my_ggplot_theme +
+  theme(panel.border = element_rect(color = "black", size = 0.5),
+        legend.position = "none", axis.text.x = element_blank(),
+        plot.margin=unit(c(1,1,-1,1), "cm"))
+
+plot_grid(S862_logo, S862_string,  ncol = 1, align = 'v')
+
+
+
+# T912
+T912_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 229, 237, posHighligthed = c(233)) + 
+  my_ggplot_theme + 
+  theme(panel.border = element_rect(color = "black", size = 0),
+        legend.position = "none", axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(),
+        plot.margin=unit(c(-1,1,1,1), "cm")) + 
+  scale_x_continuous(breaks = c(229,230,231,232,233,234,235,236,237),
+                     labels = c(908,909,910,911,912,913,914,915,916))
+
+
+
+T912_logo <- ggseqlogo(T912_file,  seq_type='aa') + 
+  my_ggplot_theme +
+  theme(panel.border = element_rect(color = "black", size = 0.5),
+        legend.position = "none", axis.text.x = element_blank(),
+        plot.margin=unit(c(1,1,-1,1), "cm"))
+
+plot_grid(T912_logo, T912_string,  ncol = 1, align = 'v')
 
 
