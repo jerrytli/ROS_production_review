@@ -2,9 +2,9 @@
 # Coaker Lab - Plant Pathology Department UC Davis
 # Author: Danielle M. Stevens
 # Last Updated: 1/24/2020
-# Script Purpose: 
-# Inputs Necessary:
-# Outputs: 
+# Script Purpose: convert blast results into fasta file
+# Inputs Necessary: blast txt file outputs (make sure it uses 6 outformat)
+# Outputs: fasta file
 #-----------------------------------------------------------------------------------------------
 
 ##############################################
