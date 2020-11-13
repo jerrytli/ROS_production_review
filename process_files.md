@@ -77,8 +77,6 @@
     ```
     This R script (Process_NADPH_homologs.R) is also ran line-by-line. But there is some additionally 
     documentation (comments) that should make it relatively easy to follow.
-    It should be noted that collecting simiarity values in a scanning-window appraoch takes 
-    a while to run (1-2 hours). I added a progress bar for easier progress monitoring.
     ```
    
 ## Part 2: Calculate similarity across residues of the N- and C-terminus AtRBOHD

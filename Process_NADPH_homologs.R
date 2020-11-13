@@ -211,19 +211,47 @@ ggplot(melt_hold_local_global_Scores, aes(x = variable, y = value)) +
 
 
 # update which terminus before running: either holdBlast_N_hits or holdBlast_C_hits
-calculate_sim_scan_score <- function(sequence_in, window_size, hit_terminus){
+calculate_sim_score_N_terminus <- function(sequence_in, window_size, hit_terminus){
+  hold_scores <- list()
+  hold_position <- list()
+  
+  for (j in 1:nchar(sequence_in)){
+    if((j + window_size) <= nchar(sequence_in)){
+      test_seq_window <- substr(sequence_in, j, (j + window_size))
+      alignment_match <- Biostrings::pairwiseAlignment(hit_terminus[1,3], test_seq_window, type = 'local-global', substitutionMatrix = "BLOSUM62")
+      hold_position[[j]] <- alignment_match@pattern@range@start
+      hold_scores[[j]] <- Biostrings::pid(alignment_match, "PID1")
+      #print(alignment_match)
+      #print(alignment_match@pattern@range@start)
+    }
+  }
+  
+  hold_position <- as.data.frame(unlist(hold_position))
+  hold_scores <- as.data.frame(unlist(hold_scores))
+  
+  sim_score_data <- cbind(hold_position, hold_scores)
+  colnames(sim_score_data) <- c("Position","Score")
+  return(sim_score_data)
+}
+
+
+
+
+# update which terminus before running: either holdBlast_N_hits or holdBlast_C_hits
+calculate_sim_score_C_terminus <- function(sequence_in, window_size, hit_terminus){
   hold_scores <- list()
   for (j in 1:nchar(sequence_in)){
     if((j + window_size) <= nchar(sequence_in)){
       test_seq_window <- substr(sequence_in, j, (j + window_size))
-      alignment_match <- pairwiseAlignment(hit_terminus[1,3], test_seq_window, type = 'local-global')
+      alignment_match <-Biostrings::pairwiseAlignment(hit_terminus[1,3], test_seq_window, type = 'local-global', substitutionMatrix = "BLOSUM62")
       #print(alignment_match)
-      hold_scores[[j]] <- pid(alignment_match)
+      hold_scores[[j]] <- Biostrings::pid(alignment_match, "PID1")
     }
   }
   hold_scores <- unlist(hold_scores)
   return(hold_scores)
 }
+
 
 
 ######################################################################
@@ -233,17 +261,21 @@ calculate_sim_scan_score <- function(sequence_in, window_size, hit_terminus){
 
 
 # Define dataframe and calulcate similarity scores for each NADPH oxidase homolog along the N-terminus
-hold_data_NTerm <- data.frame("Position" = seq(1:400)) 
+hold_data_NTerm <- data.frame("Position" = integer(0),"Score" = integer(0)) 
   
+
 # update which terminus before running: either holdBlast_N_hits or holdBlast_C_hits
 pb = txtProgressBar(min = 0, max = nrow(holdBlast_N_hits), initial = 0, style = 3) 
 for (i in 2:nrow(holdBlast_N_hits)){
-  save <- data.frame(c(calculate_sim_scan_score(holdBlast_N_hits[i,3], 10, holdBlast_N_hits), c(rep(NA, (nrow(hold_data_NTerm)-length(calculate_sim_scan_score(holdBlast_N_hits[i,3], 10, holdBlast_N_hits)))))))
-  colnames(save) <- holdBlast_N_hits[i,2]
-  hold_data_NTerm <- cbind(hold_data_NTerm, save)
+  save <- calculate_sim_score_N_terminus(holdBlast_N_hits[i,3], 17, holdBlast_N_hits)
+  colnames(save) <- c("Position","Score")
+  hold_data_NTerm <- rbind(hold_data_NTerm, save)
   setTxtProgressBar(pb, i)
 }
-  
+
+
+
+
 
 
 # Define dataframe and calulcate similarity scores for each NADPH oxidase homolog along the C-terminus 
@@ -252,12 +284,12 @@ hold_data_CTerm <- data.frame("Position" = seq(1:300))
 # update which terminus before running: either holdBlast_N_hits or holdBlast_C_hits
 pb = txtProgressBar(min = 0, max = nrow(holdBlast_C_hits), initial = 0, style = 3) 
 for (i in 2:nrow(holdBlast_C_hits)){
-  save <- data.frame(c(calculate_sim_scan_score(holdBlast_C_hits[i,3],7, holdBlast_C_hits), c(rep(NA, (nrow(hold_data_v2)-length(calculate_sim_scan_score(holdBlast_C_hits[i,3],7,holdBlast_C_hits)))))))
+  save <- data.frame(c(calculate_sim_score_C_terminus(holdBlast_C_hits[i,3],7, holdBlast_C_hits), 
+                       c(rep(NA, (nrow(hold_data_v2)-length(calculate_sim_score_C_terminus(holdBlast_C_hits[i,3],7,holdBlast_C_hits)))))))
   colnames(save) <- holdBlast_C_hits[i,2]
   hold_data_CTerm <- cbind(hold_data_CTerm, save)
   setTxtProgressBar(pb, i)
 }
-
 
 
 
@@ -271,9 +303,7 @@ hold_data_NTermM <- melt(hold_data_NTerm, id = c("Position"))
 ggplot(hold_data_NTermM, aes(x = Position, y = value)) +
   annotate(geom = "rect", xmin = 19, xmax = 28, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
   annotate(geom = "rect", xmin = 36, xmax = 42, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
-  annotate(geom = "rect", xmin = 130, xmax = 136, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
-  annotate(geom = "rect", xmin = 145, xmax = 151, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
-  annotate(geom = "rect", xmin = 160, xmax = 166, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
+  annotate(geom = "rect", xmin = 130, xmax = 166, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
   annotate(geom = "rect", xmin = 344, xmax = 340, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
   my_ggplot_theme +
   ylim(0,100) +
@@ -283,7 +313,7 @@ ggplot(hold_data_NTermM, aes(x = Position, y = value)) +
   stat_summary(aes(y = value), fun = mean, colour = "red", geom="line", size = 1) +
   scale_x_continuous(breaks = c(1, 41, 81, 121, 161, 201, 241, 281, 321, 361),
                      labels = c(1, 41, 81, 121, 161, 201, 241, 281, 321, 361),
-                     limits = c(0,376), expand = c(0,0)) +
+                     limits = c(0, 362), expand = c(0,0)) +
   theme(plot.margin=unit(c(8,10,8,8),"pt"),
         axis.title.x = element_text(vjust = -1),
         axis.text.x = element_text(vjust = -0.2))
@@ -308,7 +338,7 @@ ggplot(hold_data_CTermM, aes(x = Position, y = value)) +
   stat_summary(aes(y = value), fun = mean, colour = "red", geom="line", size = 1) +
     scale_x_continuous(breaks = c(1, 31, 61, 91, 121, 151, 181, 211, 241),
                        labels = c(680, 710,740,770, 800, 830, 860, 890, 920),
-                       limits = c(0,242), expand = c(0,0)) +
+                       limits = c(0, 242), expand = c(0,0)) +
     theme(plot.margin=unit(c(8,10,8,8),"pt"),
           axis.title.x = element_text(vjust = -1),
           axis.text.x = element_text(vjust = -0.2)) 
