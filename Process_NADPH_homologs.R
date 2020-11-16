@@ -363,45 +363,109 @@ system("mafft --thread 12 --maxiterate 1000 --localpair N-term-hits.fasta > 'N-t
   
 system("mafft --thread 12 --maxiterate 1000 --localpair C-term-hits.fasta > 'C-term-hits_alignment'")
 
+# mafft --ep 0 --thread 12 --maxiterate 10000 --genafpair N-term-hits.fasta > N-term-hits_alignment4
+  
+
+
+
+#############################################################################
+# funtion to calculate the number of cysteine residues at a couple key sites
+###########################################################################
+
+
+
+count_cystines <- function(file_in){
+  hold_residues <- list()
+  for (i in 1:nrow(file_in)){
+    hold_residues[[i]] <- stringr::str_count(file_in$V1[i], "C")
+  }
+  
+  hold_residues <- as.data.frame(unlist(hold_residues))
+  
+  # correct for unrelated cystein residues
+  for (i in 1:nrow(hold_residues)){
+    if(hold_residues$`unlist(hold_residues)`[i] == 2){
+      hold_residues$`unlist(hold_residues)`[i] <- 1
+    }
+  }
+  
+  return(hold_residues)
+}
+
+
+######################################################################
+# determing the conservation of specific cystein residues in N- and C-terminus
+######################################################################
+
+C208 <- read.table(file = "./Data_files/C208.txt", header = FALSE, stringsAsFactors = FALSE)
+C694 <- read.table(file = "./Data_files/C694.txt", header = FALSE, stringsAsFactors = FALSE)
+C825 <- read.table(file = "./Data_files/C825.txt", header = FALSE, stringsAsFactors = FALSE)
+C890 <- read.table(file = "./Data_files/C890.txt", header = FALSE, stringsAsFactors = FALSE)
 
   
+  
+C208_processed <- count_cystines(C208)
+C694_processed <- count_cystines(C694)
+C825_processed <- count_cystines(C825)
+C890_processed <- count_cystines(C890)
+
+
+C208_processed <- rbind(C208_processed, NA)
+C694_processed <- rbind(C694_processed, NA)
+Cystein_counts <- cbind(C208_processed, C694_processed, C825_processed, C890_processed)
+
+colnames(Cystein_counts) <- c("C208", "C694", "C825", "C890")
+Cystein_counts <- reshape2::melt(Cystein_counts)
+Cystein_counts$value <- as.character(Cystein_counts$value)
+Cystein_counts <- na.omit(Cystein_counts)
+
+ggplot(Cystein_counts, aes(x = variable, fill = value)) + 
+  geom_bar(position = 'fill', colour = "black", width = 0.8, size = 0.3) +
+  my_ggplot_theme +
+  xlab("") +
+  ylab("Proportion of Termini Hits \n with Cysteine \n Residue at Given Position") +
+  scale_y_continuous(labels = scales::percent_format()) + 
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Greys")
+
+
+
 
 ######################################################################
 # determing the number of cystein residues in N- and C-terminus
 ######################################################################
 
 
-N_term_Cysteines <- list()
-for (i in 1:nrow(holdBlast_N_hits)){
-  N_term_Cysteines[[i]] <- stringr::str_count(holdBlast_N_hits$seq[i], "C")/1
-}
 
-N_term_Cysteines <- cbind(as.data.frame(holdBlast_N_hits$names), as.data.frame(unlist(N_term_Cysteines)))
-colnames(N_term_Cysteines) <- c("Homolog Name", "N-terminus")
-N_term_Cysteines <- melt(N_term_Cysteines)
+#N_term_Cysteines <- cbind(as.data.frame(holdBlast_N_hits$names), as.data.frame(unlist(N_term_Cysteines)))
+#colnames(N_term_Cysteines) <- c("Homolog Name", "N-terminus")
+#N_term_Cysteines <- melt(N_term_Cysteines)
 
 
 
+# four are expected
+#C_term_Cysteines <- list()
+#for (i in 1:nrow(holdBlast_C_hits)){
+#  C_term_Cysteines[[i]] <- stringr::str_count(holdBlast_C_hits$seq[i], "C")
+#}
 
-C_term_Cysteines <- list()
-for (i in 1:nrow(holdBlast_C_hits)){
-  C_term_Cysteines[[i]] <- stringr::str_count(holdBlast_C_hits$seq[i], "C")/4
-}
-
-C_term_Cysteines <- cbind(as.data.frame(holdBlast_C_hits$names), as.data.frame(unlist(C_term_Cysteines)))
-colnames(C_term_Cysteines) <- c("Homolog Name", " C-terminus")
-C_term_Cysteines <- melt(C_term_Cysteines)
+#C_term_Cysteines <- cbind(as.data.frame(holdBlast_C_hits$names), as.data.frame(unlist(C_term_Cysteines)))
+#colnames(C_term_Cysteines) <- c("Homolog Name", " C-terminus")
+#C_term_Cysteines <- melt(C_term_Cysteines)
 
 
-test <- rbind(N_term_Cysteines, C_term_Cysteines)
-ggplot(test, aes(x = variable, y = value)) +
-  geom_boxplot(fill = "grey60", alpha = 0.6, outlier.alpha = 0) +
-  geom_jitter(fill = "black", alpha = 0.4, width = 0.25, height = 0.25) +
+#test <- rbind(N_term_Cysteines, C_term_Cysteines)
+#ggplot(test, aes(x = variable, y = value)) +
+#  geom_boxplot(fill = "grey60", alpha = 0.6, outlier.alpha = 0) +
+#  geom_jitter(fill = "black", alpha = 0.4, width = 0.25, height = 0.25) +
   #xlim(0,8) +
-  ggtitle("Number of Cysteine Residues") +
-  my_ggplot_theme +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 90))
+#  ylab("Number of Cysteine Residues\n") +
+#  scale_y_continuous(breaks = c(0, 1,2,3,4,5,6,7,8),
+#                    labels = c(0, 1,2,3,4,5,6,7,8),
+ #                    limits = c(-0.5, 8.5), expand = c(0,0)) +
+#  my_ggplot_theme +
+#  theme(axis.title.x = element_blank(),
+ #       axis.text.x = element_text(angle = 90))
 
 
 
