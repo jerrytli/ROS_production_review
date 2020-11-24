@@ -34,12 +34,13 @@
    
     After conda is initalized, we can use it to download a variety of bioinformatic software. 
     Search this website to see what they have available: https://anaconda.org/bioconda
-    Note: Sometimes the package versions are not always the most updated, many have developer versions on github
+    Note: Sometimes the package versions are not always the most updated, developer versions may exist on github.
    
-    To install the blast library:
+    To install the blast and mafft library:
     
     ```bash
      conda install -c bioconda blast 
+     conda install -c bioconda mafft
      ```
 
 2. Make blast database of genes you want to search for:
@@ -83,5 +84,5 @@
    
 1. Process the fasta file blast hits to determine similarity values. 
    
-     (Same script as in #5 from Part 1).
+    (Same script as in #5 from Part 1).
 
