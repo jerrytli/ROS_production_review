@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------------------------
 # Coaker Lab - Plant Pathology Department UC Davis
 # Author: Danielle M. Stevens
-# Last Updated: 7/27/2020
+# Last Updated: 11/23/2020
 # Script Purpose: Processing and Plotting similarity scores for NADPH oxidase homologs
 # Inputs Necessary: Theme_ggplot.R, NADPH_oxidase_homologs.fasta, C-term-hits.fasta
 # Outputs: plots of conservation of NADPH oxiadases and their associated domains
@@ -261,6 +261,7 @@ calculate_sim_score_C_terminus <- function(sequence_in, window_size, hit_terminu
 
 
 # Define dataframe and calulcate similarity scores for each NADPH oxidase homolog along the N-terminus
+# using a sliding window size of 17 to account for the higher abundacne of INDELS
 hold_data_NTerm <- data.frame("Position" = integer(0),"Score" = integer(0)) 
   
 
@@ -277,8 +278,8 @@ for (i in 2:nrow(holdBlast_N_hits)){
 
 
 
-
 # Define dataframe and calulcate similarity scores for each NADPH oxidase homolog along the C-terminus 
+# using a sliding window size of 7
 hold_data_CTerm <- data.frame("Position" = seq(1:300))
 
 # update which terminus before running: either holdBlast_N_hits or holdBlast_C_hits
@@ -298,7 +299,7 @@ for (i in 2:nrow(holdBlast_C_hits)){
 ######################################################################
 
 # N-terminus plotting along amino acid position - For Supplemental Figure
-hold_data_NTermM <- melt(hold_data_NTerm, id = c("Position"))
+hold_data_NTermM <- reshape2::melt(hold_data_NTerm, id = c("Position"))
 
 ggplot(hold_data_NTermM, aes(x = Position, y = value)) +
   annotate(geom = "rect", xmin = 19, xmax = 28, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
@@ -324,7 +325,7 @@ ggplot(hold_data_NTermM, aes(x = Position, y = value)) +
 
 
 # C-terminus plotting along amino acid position - For Figure 3B
-hold_data_CTermM <- melt(hold_data_CTerm, id = c("Position"))
+hold_data_CTermM <- reshape2::melt(hold_data_CTerm, id = c("Position"))
   
 ggplot(hold_data_CTermM, aes(x = Position, y = value)) +
     annotate(geom = "rect", xmin = 20, xmax = 25, ymin = -Inf, ymax = Inf, fill = "light grey", alpha = 0.55) +
@@ -358,14 +359,14 @@ ggplot(hold_data_CTermM, aes(x = Position, y = value)) +
 ######################################################################
 
 
-system("mafft --thread 12 --maxiterate 1000 --localpair N-term-hits.fasta > 'N-term-hits_alignment'")
+#  --ep helped with the larger indels (slighlty at least)
+system("mafft --ep 0 --thread 12 --maxiterate 10000 --genafpair N-term-hits.fasta > N-term-hits_alignment")
+
+
+#system("mafft --thread 12 --maxiterate 1000 --localpair N-term-hits.fasta > 'N-term-hits_alignment'")
 
   
 system("mafft --thread 12 --maxiterate 1000 --localpair C-term-hits.fasta > 'C-term-hits_alignment'")
-
-# mafft --ep 0 --thread 12 --maxiterate 10000 --genafpair N-term-hits.fasta > N-term-hits_alignment4
-  
-
 
 
 #############################################################################
@@ -397,24 +398,41 @@ count_cystines <- function(file_in){
 # determing the conservation of specific cystein residues in N- and C-terminus
 ######################################################################
 
-C208 <- read.table(file = "./Data_files/C208.txt", header = FALSE, stringsAsFactors = FALSE)
-C694 <- read.table(file = "./Data_files/C694.txt", header = FALSE, stringsAsFactors = FALSE)
-C825 <- read.table(file = "./Data_files/C825.txt", header = FALSE, stringsAsFactors = FALSE)
-C890 <- read.table(file = "./Data_files/C890.txt", header = FALSE, stringsAsFactors = FALSE)
+C208 <- read.table(file = "./Data_files/C208.txt", header = FALSE, stringsAsFactors = FALSE) #C208.txt
+C651 <- read.table(file = "./Data_files/C651.txt", header = FALSE, stringsAsFactors = FALSE) #C651.txt
+C695 <- read.table(file = "./Data_files/C695.txt", header = FALSE, stringsAsFactors = FALSE) #C695.txt
+C825 <- read.table(file = "./Data_files/C825.txt", header = FALSE, stringsAsFactors = FALSE) #C825.txt
+C890 <- read.table(file = "./Data_files/C890.txt", header = FALSE, stringsAsFactors = FALSE) #C890.txt
 
-  
-  
+
+# Applies function (above) which counts and corrects if more than 
+# one cystein is present (we are only interested in the residue at each particular position)  
 C208_processed <- count_cystines(C208)
-C694_processed <- count_cystines(C694)
+C651_processed <- count_cystines(C651)
+C695_processed <- count_cystines(C695)
 C825_processed <- count_cystines(C825)
 C890_processed <- count_cystines(C890)
 
+# cleaning up the data so each data table can go together before plotting
+x <- as.data.frame(rep(NA, 8))
+colnames(x) <- colnames(C208_processed)
+C208_processed <- rbind(C208_processed, x)
 
-C208_processed <- rbind(C208_processed, NA)
-C694_processed <- rbind(C694_processed, NA)
-Cystein_counts <- cbind(C208_processed, C694_processed, C825_processed, C890_processed)
+x <- as.data.frame(rep(NA, 8))
+colnames(x) <- colnames(C695_processed)
+C695_processed <- rbind(C695_processed, x)
 
-colnames(Cystein_counts) <- c("C208", "C694", "C825", "C890")
+x <- as.data.frame(rep(NA, 7))
+colnames(x) <- colnames(C825_processed)
+C825_processed <- rbind(C825_processed, x)
+
+x <- as.data.frame(rep(NA, 7))
+colnames(x) <- colnames(C890_processed)
+C890_processed <- rbind(C890_processed, x)
+
+Cystein_counts <- cbind(C208_processed, C651_processed, C695_processed, C825_processed, C890_processed)
+
+colnames(Cystein_counts) <- c("C208", "C651", "C695", "C825", "C890")
 Cystein_counts <- reshape2::melt(Cystein_counts)
 Cystein_counts$value <- as.character(Cystein_counts$value)
 Cystein_counts <- na.omit(Cystein_counts)
@@ -470,6 +488,7 @@ ggplot(Cystein_counts, aes(x = variable, fill = value)) +
 
 
 
+
 ######################################################################
 # weblogos
 ######################################################################  
@@ -477,74 +496,74 @@ ggplot(Cystein_counts, aes(x = variable, fill = value)) +
 # after much discussion, we decided to use bardo's weblogos instead. however, I'm choosing
 # to leave this code base here for my own refernce
 
-x <- readAAStringSet(filepath = "./NADPH-oxidase-cTerm-reference.fasta", format = "fasta")
+#x <- readAAStringSet(filepath = "./NADPH-oxidase-cTerm-reference.fasta", format = "fasta")
 
 
-S703_file <- readLines(file.choose())
-S862_file <- readLines(file.choose())
-T912_file <- readLines(file.choose())
+#S703_file <- readLines(file.choose())
+#S862_file <- readLines(file.choose())
+#T912_file <- readLines(file.choose())
 
 
 # S862 
-S703_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 20, 28, posHighligthed = c(24)) + 
-  my_ggplot_theme + 
-  theme(panel.border = element_rect(color = "black", size = 0),
-        legend.position = "none", axis.text.y = element_blank(), 
-        axis.ticks.y = element_blank(),
-        plot.margin=unit(c(-1,1,1,1), "cm")) + 
-  scale_x_continuous(breaks = c(20,21,22,23,24,25,26,27,28),
-                     labels = c(699,700,701,702,703,704,705,706,708))
+#S703_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 20, 28, posHighligthed = c(24)) + 
+#  my_ggplot_theme + 
+#  theme(panel.border = element_rect(color = "black", size = 0),
+#        legend.position = "none", axis.text.y = element_blank(), 
+#        axis.ticks.y = element_blank(),
+#        plot.margin=unit(c(-1,1,1,1), "cm")) + 
+#  scale_x_continuous(breaks = c(20,21,22,23,24,25,26,27,28),
+#                     labels = c(699,700,701,702,703,704,705,706,708))
 
 
-S703_logo <- ggseqlogo(S703_file,  seq_type='aa', method = 'prob') + 
-  my_ggplot_theme +
-  theme(panel.border = element_rect(color = "black", size = 0.5),
-        legend.position = "none", axis.text.x = element_blank(),
-        plot.margin=unit(c(1,1,-1,1), "cm"))
+#S703_logo <- ggseqlogo(S703_file,  seq_type='aa', method = 'prob') + 
+#  my_ggplot_theme +
+#  theme(panel.border = element_rect(color = "black", size = 0.5),
+#        legend.position = "none", axis.text.x = element_blank(),
+#        plot.margin=unit(c(1,1,-1,1), "cm"))
 
-plot_grid(S703_logo, S703_string,  ncol = 1, align = 'v')
+#plot_grid(S703_logo, S703_string,  ncol = 1, align = 'v')
 
 
 # S862
-S862_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 179, 187, posHighligthed = c(183)) + 
-  my_ggplot_theme + 
-  theme(panel.border = element_rect(color = "black", size = 0),
-        legend.position = "none", axis.text.y = element_blank(), 
-        axis.ticks.y = element_blank(),
-        plot.margin=unit(c(-1,1,1,1), "cm")) + 
-  scale_x_continuous(breaks = c(179,180,181,182,183,184,185,186,187),
-                     labels = c(858,859,860,861,862,863,864,865,866))
+#S862_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 179, 187, posHighligthed = c(183)) + 
+#  my_ggplot_theme + 
+#  theme(panel.border = element_rect(color = "black", size = 0),
+#        legend.position = "none", axis.text.y = element_blank(), 
+#        axis.ticks.y = element_blank(),
+#        plot.margin=unit(c(-1,1,1,1), "cm")) + 
+#  scale_x_continuous(breaks = c(179,180,181,182,183,184,185,186,187),
+#                     labels = c(858,859,860,861,862,863,864,865,866))
 
 
 
-S862_logo <- ggseqlogo(S862_file,  seq_type='aa',method = 'prob') + 
-  my_ggplot_theme +
-  theme(panel.border = element_rect(color = "black", size = 0.5),
-        legend.position = "none", axis.text.x = element_blank(),
-        plot.margin=unit(c(1,1,-1,1), "cm"))
+#S862_logo <- ggseqlogo(S862_file,  seq_type='aa',method = 'prob') + 
+#  my_ggplot_theme +
+#  theme(panel.border = element_rect(color = "black", size = 0.5),
+#        legend.position = "none", axis.text.x = element_blank(),
+#        plot.margin=unit(c(1,1,-1,1), "cm"))
 
-plot_grid(S862_logo, S862_string,  ncol = 1, align = 'v')
+#plot_grid(S862_logo, S862_string,  ncol = 1, align = 'v')
 
 
 
 # T912
-T912_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 229, 237, posHighligthed = c(233)) + 
-  my_ggplot_theme + 
-  theme(panel.border = element_rect(color = "black", size = 0),
-        legend.position = "none", axis.text.y = element_blank(), 
-        axis.ticks.y = element_blank(),
-        plot.margin=unit(c(-1,1,1,1), "cm")) + 
-  scale_x_continuous(breaks = c(229,230,231,232,233,234,235,236,237),
-                     labels = c(908,909,910,911,912,913,914,915,916))
+#T912_string <- ggmsa::ggmsa(x, seq_name = FALSE, char_width = 0.6, color = "Chemistry_AA", 229, 237, posHighligthed = c(233)) + 
+#  my_ggplot_theme + 
+#  theme(panel.border = element_rect(color = "black", size = 0),
+#        legend.position = "none", axis.text.y = element_blank(), 
+#        axis.ticks.y = element_blank(),
+#        plot.margin=unit(c(-1,1,1,1), "cm")) + 
+#  scale_x_continuous(breaks = c(229,230,231,232,233,234,235,236,237),
+#                     labels = c(908,909,910,911,912,913,914,915,916))
+#
 
 
+#T912_logo <- ggseqlogo(T912_file,  seq_type='aa') + 
+#  my_ggplot_theme +
+#  theme(panel.border = element_rect(color = "black", size = 0.5),
+#        legend.position = "none", axis.text.x = element_blank(),
+#        plot.margin=unit(c(1,1,-1,1), "cm"))
 
-T912_logo <- ggseqlogo(T912_file,  seq_type='aa') + 
-  my_ggplot_theme +
-  theme(panel.border = element_rect(color = "black", size = 0.5),
-        legend.position = "none", axis.text.x = element_blank(),
-        plot.margin=unit(c(1,1,-1,1), "cm"))
-
-plot_grid(T912_logo, T912_string,  ncol = 1, align = 'v')
+#plot_grid(T912_logo, T912_string,  ncol = 1, align = 'v')
 
 
