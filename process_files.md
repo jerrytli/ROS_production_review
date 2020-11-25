@@ -2,7 +2,7 @@
 
 1. Download anaconda and blast.
     
-    We can use conda to help download software needed to find the orthologs we desire and processes them for phylogenetic analsyes.
+    We can use conda to help download software needed to find the orthologs we desire and processes them for subsequent analsyes.
  
     ```bash
     # go to this website https://www.anaconda.com/distribution/
@@ -22,7 +22,10 @@
 
 
     # if you need to initalize conda
-    # write the command $conda init {shell script - aka bash}
+    # write the command:
+    
+    conda init 
+    
     # then restart ternminal, it should look like this: 
     (base) danimstevens@danimstevens-MS-7B93:
 
