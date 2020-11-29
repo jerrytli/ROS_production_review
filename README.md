@@ -10,9 +10,10 @@ Bardo Castro<sup>1</sup>, Matteo Citterico<sup>2</sup>, Sachie Kimura<sup>3</sup
 
 -----------------------
 
-#### Purpose: The scripts in this repository are for processing and ploting scores of similarity for NADPH oxidase homologs. 
-See below or for more details, check out this markdown file [here](process_files.md). Also, package versions can be found in the session_info.txt file.
+#### Purpose: 
+The scripts in this repository are for processing and ploting scores of similarity for NADPH oxidase homologs. See below or for more details, check out this markdown file [here](process_files.md). Also, package versions can be found in the session_info.txt file.
 
+<br/>
 
 ### Part 1: Calculate similarity across full-length NADPH oxidase homologs, the N-terminus, and the C-terminus
 Briefly, we wanted to cross compare the similarity of full-length NADPH oxidase homologs to the N- and C-terminus region. This region from NADPH oxidase homologs was extracted via a custom blast search, aligned to their respective sequence comaprsion (full length homolog vs. full length AtRBOHD and parsed N- and C-terminus of homolog vs. N- and C-terminus of AtRBOHD, respectively), and a similarity score was calculated. Unsurprisingly, C-terminus is overall more conserved in similarity to the reference than the N-terminus and full-length protein. 
