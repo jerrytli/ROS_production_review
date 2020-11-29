@@ -10,7 +10,8 @@ Bardo Castro<sup>1</sup>, Matteo Citterico<sup>2</sup>, Sachie Kimura<sup>3</sup
 
 -----------------------
 
-#### Purpose: The scripts in this repository are for processing and ploting scores of similarity for NADPH oxidase homologs. See below or for more details, check out this markdown file [here](process_files.md).
+#### Purpose: The scripts in this repository are for processing and ploting scores of similarity for NADPH oxidase homologs. 
+See below or for more details, check out this markdown file [here](process_files.md). Also, package versions can be found in the session_info.txt file.
 
 
 ### Part 1: Calculate similarity across full-length NADPH oxidase homologs, the N-terminus, and the C-terminus
