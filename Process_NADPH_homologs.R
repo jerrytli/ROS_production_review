@@ -448,6 +448,78 @@ ggplot(Cystein_counts, aes(x = variable, fill = value)) +
 
 
 
+######################################################################
+# pulling out specific N-terminal regions for weblogo
+######################################################################
+
+# Querying for S22 and T24 conservation
+S22_T24 <- c("ANSDTNSDTES")
+S22_T24_list <- list()
+for (i in 1:nrow(N_term_fasta)){
+  seq <- Biostrings::pairwiseAlignment(subseq(N_term_fasta$seq[i], 1,50), S22_T24, type = 'local-global')
+  S22_T24_list[[i]] <- as.character(seq@pattern)
+}
+
+
+lapply(S22_T24_list, write, "S22_T24.txt", append = TRUE)
+
+
+# Querying for S39 conservation
+S39 <- c("RGAFSGPLG")
+S39_list <- list()
+for (i in 1:nrow(N_term_fasta)){
+  seq <- Biostrings::pairwiseAlignment(subseq(N_term_fasta$seq[i], 1,50), S39, type = 'local-global')
+  S39_list[[i]] <- as.character(seq@pattern)
+}
+
+
+
+lapply(S39_list, write, "S39.txt", append = TRUE)
+
+
+# Querying for S133 conservation
+S133 <- c("FFRSTSSRI") 
+S133_list <- list()
+for (i in 1:nrow(N_term_fasta)){
+  seq <- Biostrings::pairwiseAlignment(subseq(N_term_fasta$seq[i], 100,150), S133, type = 'local-global')
+  S133_list[[i]] <- as.character(seq@pattern)
+}
+
+
+
+lapply(S133_list, write, "S133.txt", append = TRUE)
+
+
+# Querying for S148 & S163 conservation
+S148_S163 <- c("VFSRRPSPAVRRFDRTSSAA") 
+S148_S163_list <- list()
+for (i in 1:nrow(N_term_fasta)){
+  seq <- Biostrings::pairwiseAlignment(subseq(N_term_fasta$seq[i], 120,180), S148_S163, type = 'local-global')
+  S148_S163_list[[i]] <- as.character(seq@pattern)
+}
+
+
+
+lapply(S148_S163_list, write, "S148_S163.txt", append = TRUE)
+
+
+# Querying for S347 conservation
+S347 <- c("SRILSQMLSQKLR") 
+S347_list <- list()
+for (i in 1:nrow(N_term_fasta)){
+  seq <- Biostrings::pairwiseAlignment(subseq(N_term_fasta$seq[i], 
+                                              (nchar(N_term_fasta$seq[i])-50), 
+                                       nchar(N_term_fasta$seq[i])), 
+                                       S347, type = 'local-global')
+  S347_list[[i]] <- as.character(seq@pattern)
+}
+
+
+
+lapply(S347_list, write, "S347.txt", append = TRUE)
+
+
+
 
 ######################################################################
 # determing the number of cystein residues in N- and C-terminus
