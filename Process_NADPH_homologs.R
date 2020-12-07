@@ -179,20 +179,22 @@ colnames(hold_local_global_Scores) <- c("Full Length","N-terminus","C-terminus")
 melt_hold_local_global_Scores <- reshape2::melt(hold_local_global_Scores)
 
 
+
 # plot data - For Figure 3A
 ggplot(melt_hold_local_global_Scores, aes(x = variable, y = value)) +
   geom_boxplot(fill = "grey60", alpha = 0.6, outlier.alpha = 0) +
-  geom_jitter(fill = "black", alpha = 0.4, width = 0.2, height = 0) +
+  geom_jitter(fill = "black", alpha = 0.4, width = 0.25, height = 0, size =1) +
   my_ggplot_theme +
   ylab("Percent AA Similarity") +
   # I used 99 instead of 100 to remove AtRBOHD comparison against itself
   ylim(0,99.9) +
   xlab("") +
-  theme(axis.ticks.length.x = unit(0, "mm"), 
-        axis.text.x.bottom = element_text(vjust = -1, size = 11), 
+  theme(axis.ticks.length.x = unit(1.5, "mm"), 
+        axis.text.x.bottom = element_text(vjust = 0.95, hjust = 1, size = 14, angle = 45), 
         axis.text.y.left = element_text(hjust = 0.8))
 
-#export at device demensions of 6.5 x 2.5 inches
+
+ggsave("Whole_region.pdf", width = 2.4, height = 5, units = "in")
 
 
 
@@ -342,10 +344,13 @@ ggplot(hold_data_CTermM, aes(x = Position, y = value)) +
                        limits = c(0, 242), expand = c(0,0)) +
     theme(plot.margin=unit(c(8,10,8,8),"pt"),
           axis.title.x = element_text(vjust = -1),
-          axis.text.x = element_text(vjust = -0.2)) 
+          axis.text.x = element_text(vjust = -0.2),
+          axis.title.y = element_text(size = 13.5)) 
 
 
-#export at device demensions of 5.7 x 2.5 inches
+
+ggsave("Along_C_Terminus.pdf", width = 7.2, height = 2.4, units = "in")
+
 
 
 #old assthetics that were later removed
