@@ -1,4 +1,4 @@
-# Recent advancements in ROS compartmentalization, perception, and signaling in plants
+# Stress-induced reactive oxygen species compartmentalization, perception and signalling
 
 Bardo Castro<sup>1</sup>, Matteo Citterico<sup>2</sup>, Sachie Kimura<sup>3</sup>, Danielle M. Stevens<sup>1</sup>, Michael Wraczek<sup>2</sup>, Gitta Coaker<sup>1</sup>.
 
