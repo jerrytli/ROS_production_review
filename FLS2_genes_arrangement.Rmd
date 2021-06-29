@@ -1,0 +1,46 @@
+---
+title: "FLS2 genome arrangement"
+author: "JTL"
+date: "6/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+Make FLS2_arrange data
+```{r}
+FLS2_genes <- read_csv("~/Downloads/FLS2 Alignment/Input/FLS2 genes.csv")
+```
+Make plot
+```{r}
+ggplot(FLS2_genes, aes(xmin = start, xmax = end, y = molecule, fill = gene)) +
+  geom_gene_arrow() +
+  facet_wrap(~ molecule, scales = "free", ncol = 1) +
+  scale_fill_brewer(palette = "Set3") +
+  theme_genes()+
+  scale_x_continuous(breaks = c(0, 3700, 7500, 10000, 14000),
+                     labels = c(0, 3700, 7500, 10000, 14000),
+                     limits = c(0, 15000))
+ggsave("FLS2_genes_arrangement.pdf", width = 6, height = 2.4, units = "in")
+```
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
